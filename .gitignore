@@ -1,0 +1,8 @@
+# Backup files
+site.html
+ШКоДа.html
+
+# OS files
+Thumbs.db
+.DS_Store
+*.swp
