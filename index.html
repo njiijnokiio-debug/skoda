@@ -811,32 +811,23 @@
       submitBtn.textContent = 'Отправка...';
       submitBtn.disabled = true;
 
-      // Try to send via MAX Bot API
-      var botToken = 'f9LHodD0cOIe6RvibUT65PPH8AI7JEaLqrAcka0endP65691y7x6q-KP9S2SD-v09LGYCMxa6gI0dLp_rB5W';
-      var chatId = '79295774013';
-      var sent = false;
-
-      var controller = new AbortController();
-      var timeout = setTimeout(function() { controller.abort(); }, 5000);
-
-      fetch('https://platform-api2.max.ru/messages', {
+      fetch('/api/proxy', {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + botToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ text: msg, chat_id: chatId }),
-        signal: controller.signal
-      }).then(function() {
-        sent = true;
-      }).catch(function() {
-        navigator.clipboard.writeText(msg).catch(function() {});
-      }).then(function() {
-        clearTimeout(timeout);
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: nameVal, phone: phoneVal, direction: dirVal })
+      }).then(function(resp) {
+        return resp.json();
+      }).then(function(data) {
         submitBtn.textContent = 'Записаться на пробное занятие';
         submitBtn.disabled = false;
         signupForm.reset();
-        // Show success modal
+        successModal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }).catch(function() {
+        navigator.clipboard.writeText(msg).catch(function() {});
+        submitBtn.textContent = 'Записаться на пробное занятие';
+        submitBtn.disabled = false;
+        signupForm.reset();
         successModal.classList.add('is-open');
         document.body.style.overflow = 'hidden';
       });
