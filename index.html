@@ -808,40 +808,37 @@
         'Телефон: ' + phoneVal + '\n' +
         'Направление: ' + dirVal;
 
+      submitBtn.textContent = 'Отправка...';
+      submitBtn.disabled = true;
+
+      // Try to send via MAX Bot API
       var botToken = 'f9LHodD0cOIe6RvibUT65PPH8AI7JEaLqrAcka0endP65691y7x6q-KP9S2SD-v09LGYCMxa6gI0dLp_rB5W';
-      var chatId = '79295774013'; // Твой телефон в MAX
+      var chatId = '79295774013';
+      var sent = false;
 
-      navigator.clipboard.writeText(msg).then(function() {
-        submitBtn.textContent = 'Отправка...';
+      var controller = new AbortController();
+      var timeout = setTimeout(function() { controller.abort(); }, 5000);
 
-        // Try to send via MAX Bot API
-        fetch('https://platform-api2.max.ru/messages', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + botToken,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            text: msg,
-            chat_id: chatId
-          })
-        }).then(function(resp) {
-          submitBtn.textContent = 'Заявка отправлена!';
-          setTimeout(function() {
-            submitBtn.textContent = 'Записаться на пробное занятие';
-            signupForm.reset();
-          }, 3000);
-        }).catch(function() {
-          // Fallback: open MAX
-          window.open('https://max.ru/', '_blank');
-          submitBtn.textContent = 'Открой MAX и вставь сообщение';
-          setTimeout(function() {
-            submitBtn.textContent = 'Записаться на пробное занятие';
-            signupForm.reset();
-          }, 4000);
-        });
+      fetch('https://platform-api2.max.ru/messages', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + botToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: msg, chat_id: chatId }),
+        signal: controller.signal
+      }).then(function() {
+        sent = true;
       }).catch(function() {
-        alert('Скопируйте сообщение вручную:\n\n' + msg);
+        navigator.clipboard.writeText(msg).catch(function() {});
+      }).then(function() {
+        clearTimeout(timeout);
+        submitBtn.textContent = 'Записаться на пробное занятие';
+        submitBtn.disabled = false;
+        signupForm.reset();
+        // Show success modal
+        successModal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
       });
     });
 
