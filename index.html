@@ -808,15 +808,39 @@
         'Телефон: ' + phoneVal + '\n' +
         'Направление: ' + dirVal;
 
+      var botToken = 'f9LHodD0cOIe6RvibUT65PPH8AI7JEaLqrAcka0endP65691y7x6q-KP9S2SD-v09LGYCMxa6gI0dLp_rB5W';
+      var chatId = ''; // Введи свой ID в MAX
+
       navigator.clipboard.writeText(msg).then(function() {
-        window.open('https://max.ru/', '_blank');
-        submitBtn.textContent = 'Сообщение скопировано! Вставьте в чат MAX';
-        setTimeout(function() {
-          submitBtn.textContent = 'Записаться на пробное занятие';
-          signupForm.reset();
-        }, 3000);
+        submitBtn.textContent = 'Отправка...';
+
+        // Try to send via MAX Bot API
+        fetch('https://platform-api2.max.ru/messages', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + botToken,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: msg,
+            chat_id: chatId
+          })
+        }).then(function(resp) {
+          submitBtn.textContent = 'Заявка отправлена!';
+          setTimeout(function() {
+            submitBtn.textContent = 'Записаться на пробное занятие';
+            signupForm.reset();
+          }, 3000);
+        }).catch(function() {
+          // Fallback: open MAX
+          window.open('https://max.ru/', '_blank');
+          submitBtn.textContent = 'Открой MAX и вставь сообщение';
+          setTimeout(function() {
+            submitBtn.textContent = 'Записаться на пробное занятие';
+            signupForm.reset();
+          }, 4000);
+        });
       }).catch(function() {
-        window.open('https://max.ru/', '_blank');
         alert('Скопируйте сообщение вручную:\n\n' + msg);
       });
     });
