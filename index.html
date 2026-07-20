@@ -811,7 +811,10 @@
       submitBtn.textContent = 'Отправка...';
       submitBtn.disabled = true;
 
-      fetch('/api/proxy', {
+      var apiUrl = window.location.hostname === 'njiijnokiio-debug.github.io' ?
+        'https://shkoda-two.vercel.app/api/proxy' : '/api/proxy';
+
+      fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: nameVal, phone: phoneVal, direction: dirVal })
@@ -821,6 +824,9 @@
         submitBtn.textContent = 'Записаться на пробное занятие';
         submitBtn.disabled = false;
         signupForm.reset();
+        if (data && data.ok === false) {
+          navigator.clipboard.writeText(msg).catch(function() {});
+        }
         successModal.classList.add('is-open');
         document.body.style.overflow = 'hidden';
       }).catch(function() {
